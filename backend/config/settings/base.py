@@ -41,16 +41,18 @@ INSTALLED_APPS = [
     'storages',
     'csp',
     
-    # Local Apps (to be created in subsequent phases)
-    # 'apps.core',
+    # Local Apps - Phase 2: Infrastructure
+    'apps.core',
+    'apps.billing',
+    'apps.events',
+    'apps.webhooks',
+    
+    # Local Apps - Phase 3+: To be enabled
     # 'apps.users',
     # 'apps.organizations',
     # 'apps.subscriptions',
-    # 'apps.billing',
     # 'apps.leads',
     # 'apps.privacy',
-    # 'apps.webhooks',
-    # 'apps.events',
 ]
 
 # =============================================================================
