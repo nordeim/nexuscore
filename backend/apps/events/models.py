@@ -16,8 +16,8 @@ class Event(models.Model):
     - Debugging
     - Activity feeds
     
-    Note: ForeignKeys use string references since User and Organization
-    models will be created in later phases.
+    Note: user_id and organization_id are stored as UUIDs.
+    In Phase 3+, we'll add proper ForeignKey relationships via migrations.
     """
     
     # Primary key
@@ -34,22 +34,19 @@ class Event(models.Model):
         help_text='Event type in dot notation (e.g., user.created)'
     )
     
-    # Related entities (nullable - will be resolved when models exist)
-    user = models.ForeignKey(
-        'users.User',
-        on_delete=models.SET_NULL,
+    # Related entities - stored as UUIDs until User/Organization apps exist
+    # These will be converted to ForeignKeys in Phase 3/4 via migration
+    user_id = models.UUIDField(
         null=True,
         blank=True,
-        related_name='events',
-        help_text='User who triggered the event'
+        db_index=True,
+        help_text='UUID of the user who triggered the event'
     )
-    organization = models.ForeignKey(
-        'organizations.Organization',
-        on_delete=models.SET_NULL,
+    organization_id = models.UUIDField(
         null=True,
         blank=True,
-        related_name='events',
-        help_text='Organization context for the event'
+        db_index=True,
+        help_text='UUID of the organization context'
     )
     
     # Event data
@@ -68,8 +65,8 @@ class Event(models.Model):
         verbose_name_plural = 'Events'
         indexes = [
             models.Index(fields=['event_type', 'created_at']),
-            models.Index(fields=['user', 'created_at']),
-            models.Index(fields=['organization', 'created_at']),
+            models.Index(fields=['user_id', 'created_at']),
+            models.Index(fields=['organization_id', 'created_at']),
         ]
         ordering = ['-created_at']
     
@@ -85,9 +82,12 @@ class Event(models.Model):
             Event.log('user.created', user=user, email=user.email)
             Event.log('subscription.activated', organization=org, plan_id=plan.id)
         """
+        user_id = getattr(user, 'id', None) if user else None
+        org_id = getattr(organization, 'id', None) if organization else None
+        
         return cls.objects.create(
             event_type=event_type,
-            user=user,
-            organization=organization,
+            user_id=user_id,
+            organization_id=org_id,
             data=data
         )

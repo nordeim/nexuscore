@@ -7,17 +7,30 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
-from decouple import config, Csv
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+
+def get_env(key, default=None, cast=str):
+    """Helper function to get environment variables with type casting."""
+    value = os.environ.get(key, default)
+    if value is None:
+        return None
+    if cast == bool:
+        return value.lower() in ('true', '1', 'yes', 'on')
+    if cast == int:
+        return int(value)
+    if cast == list:
+        return [v.strip() for v in value.split(',') if v.strip()]
+    return value
+
 
 # =============================================================================
 # SECURITY SETTINGS
 # =============================================================================
-SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-me-in-production')
-DEBUG = config('DEBUG', default=False, cast=bool)
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
+SECRET_KEY = get_env('SECRET_KEY', 'django-insecure-change-me-in-production')
+DEBUG = get_env('DEBUG', 'False', cast=bool)
+ALLOWED_HOSTS = get_env('ALLOWED_HOSTS', 'localhost,127.0.0.1', cast=list)
 
 # =============================================================================
 # APPLICATION DEFINITION
@@ -67,7 +80,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'csp.middleware.CSPMiddleware',  # Django 6.0 native CSP support
+    'csp.middleware.CSPMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -96,16 +109,15 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME', default='nexuscore'),
-        'USER': config('DB_USER', default='nexuscore_user'),
-        'PASSWORD': config('DB_PASSWORD', default='nexuscore_password'),
-        'HOST': config('DB_HOST', default='postgres'),
-        'PORT': config('DB_PORT', default='5432'),
-        'CONN_HEALTH_CHECKS': True,  # Django 6.0 feature
+        'NAME': get_env('DB_NAME', 'nexuscore'),
+        'USER': get_env('DB_USER', 'nexuscore_user'),
+        'PASSWORD': get_env('DB_PASSWORD', 'nexuscore_password'),
+        'HOST': get_env('DB_HOST', 'localhost'),
+        'PORT': get_env('DB_PORT', '5432'),
+        'CONN_HEALTH_CHECKS': True,
         'CONN_MAX_AGE': 60,
         'OPTIONS': {
             'connect_timeout': 10,
-            'options': '-c statement_timeout=5000',  # 5 second timeout
         },
     }
 }
@@ -114,9 +126,9 @@ DATABASES = {
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # =============================================================================
-# CUSTOM USER MODEL
+# CUSTOM USER MODEL (commented out until Phase 3)
 # =============================================================================
-AUTH_USER_MODEL = 'users.User'
+# AUTH_USER_MODEL = 'users.User'
 
 # =============================================================================
 # PASSWORD VALIDATION
@@ -141,7 +153,7 @@ USE_TZ = True
 # =============================================================================
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_DIRS = [BASE_DIR / 'static']
+STATICFILES_DIRS = [BASE_DIR / 'static'] if (BASE_DIR / 'static').exists() else []
 
 # =============================================================================
 # MEDIA FILES
@@ -152,10 +164,10 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # =============================================================================
 # AWS S3 CONFIGURATION (Singapore Region for PDPA)
 # =============================================================================
-AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID', default='')
-AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY', default='')
-AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME', default='nexuscore-storage')
-AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME', default='ap-southeast-1')
+AWS_ACCESS_KEY_ID = get_env('AWS_ACCESS_KEY_ID', '')
+AWS_SECRET_ACCESS_KEY = get_env('AWS_SECRET_ACCESS_KEY', '')
+AWS_STORAGE_BUCKET_NAME = get_env('AWS_STORAGE_BUCKET_NAME', 'nexuscore-storage')
+AWS_S3_REGION_NAME = get_env('AWS_S3_REGION_NAME', 'ap-southeast-1')
 AWS_DEFAULT_ACL = 'private'
 AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=86400'}
 AWS_QUERYSTRING_AUTH = True
@@ -207,30 +219,30 @@ SIMPLE_JWT = {
 # =============================================================================
 # CORS CONFIGURATION
 # =============================================================================
-CORS_ALLOWED_ORIGINS = config(
+CORS_ALLOWED_ORIGINS = get_env(
     'CORS_ALLOWED_ORIGINS',
-    default='http://localhost:3000,http://127.0.0.1:3000',
-    cast=Csv()
+    'http://localhost:3000,http://127.0.0.1:3000',
+    cast=list
 )
 CORS_ALLOW_CREDENTIALS = True
 
 # =============================================================================
 # CSRF CONFIGURATION
 # =============================================================================
-CSRF_TRUSTED_ORIGINS = config(
+CSRF_TRUSTED_ORIGINS = get_env(
     'CSRF_TRUSTED_ORIGINS',
-    default='http://localhost:3000,http://127.0.0.1:3000',
-    cast=Csv()
+    'http://localhost:3000,http://127.0.0.1:3000',
+    cast=list
 )
 
 # =============================================================================
 # CELERY CONFIGURATION
 # =============================================================================
-CELERY_BROKER_URL = config('CELERY_BROKER_URL', default='redis://redis:6379/1')
-CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND', default='redis://redis:6379/2')
+CELERY_BROKER_URL = get_env('CELERY_BROKER_URL', 'redis://localhost:6379/1')
+CELERY_RESULT_BACKEND = get_env('CELERY_RESULT_BACKEND', 'redis://localhost:6379/2')
 CELERY_TIMEZONE = 'Asia/Singapore'
 CELERY_TASK_TRACK_STARTED = True
-CELERY_TASK_TIME_LIMIT = 30 * 60  # 30 minutes
+CELERY_TASK_TIME_LIMIT = 30 * 60
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
@@ -241,31 +253,35 @@ CELERY_RESULT_SERIALIZER = 'json'
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
-        'LOCATION': config('REDIS_URL', default='redis://redis:6379/0'),
+        'LOCATION': get_env('REDIS_URL', 'redis://localhost:6379/0'),
     }
 }
 
 # =============================================================================
 # EMAIL CONFIGURATION
 # =============================================================================
-EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
-EMAIL_HOST = config('EMAIL_HOST', default='localhost')
-EMAIL_PORT = config('EMAIL_PORT', default=25, cast=int)
-EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=False, cast=bool)
-EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
-DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@nexuscore.sg')
+EMAIL_BACKEND = get_env('EMAIL_BACKEND', 'django.core.mail.backends.console.EmailBackend')
+EMAIL_HOST = get_env('EMAIL_HOST', 'localhost')
+EMAIL_PORT = get_env('EMAIL_PORT', '25', cast=int)
+EMAIL_USE_TLS = get_env('EMAIL_USE_TLS', 'False', cast=bool)
+EMAIL_HOST_USER = get_env('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = get_env('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL = get_env('DEFAULT_FROM_EMAIL', 'noreply@nexuscore.sg')
 
 # =============================================================================
-# CONTENT SECURITY POLICY (Django 6.0 Native)
+# CONTENT SECURITY POLICY (django-csp 4.0 format)
 # =============================================================================
-CSP_DEFAULT_SRC = ("'self'",)
-CSP_STYLE_SRC = ("'self'", "'unsafe-inline'")
-CSP_SCRIPT_SRC = ("'self'", "'unsafe-inline'", "'unsafe-eval'", 'https://js.stripe.com')
-CSP_IMG_SRC = ("'self'", 'data:', 'https:')
-CSP_FONT_SRC = ("'self'", 'https://fonts.gstatic.com')
-CSP_CONNECT_SRC = ("'self'", 'https://api.stripe.com')
-CSP_FRAME_SRC = ("'self'", 'https://js.stripe.com')
+CONTENT_SECURITY_POLICY = {
+    'DIRECTIVES': {
+        'default-src': ("'self'",),
+        'style-src': ("'self'", "'unsafe-inline'"),
+        'script-src': ("'self'", "'unsafe-inline'", "'unsafe-eval'", 'https://js.stripe.com'),
+        'img-src': ("'self'", 'data:', 'https:'),
+        'font-src': ("'self'", 'https://fonts.gstatic.com'),
+        'connect-src': ("'self'", 'https://api.stripe.com'),
+        'frame-src': ("'self'", 'https://js.stripe.com'),
+    }
+}
 
 # =============================================================================
 # SECURITY SETTINGS
@@ -277,29 +293,29 @@ SECURE_CONTENT_TYPE_NOSNIFF = True
 # =============================================================================
 # STRIPE CONFIGURATION
 # =============================================================================
-STRIPE_PUBLIC_KEY = config('STRIPE_PUBLIC_KEY', default='')
-STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY', default='')
-STRIPE_WEBHOOK_SECRET = config('STRIPE_WEBHOOK_SECRET', default='')
-STRIPE_API_VERSION = config('STRIPE_API_VERSION', default='2024-12-18.acacia')
+STRIPE_PUBLIC_KEY = get_env('STRIPE_PUBLIC_KEY', '')
+STRIPE_SECRET_KEY = get_env('STRIPE_SECRET_KEY', '')
+STRIPE_WEBHOOK_SECRET = get_env('STRIPE_WEBHOOK_SECRET', '')
+STRIPE_API_VERSION = get_env('STRIPE_API_VERSION', '2024-12-18.acacia')
 
 # =============================================================================
 # SENTRY CONFIGURATION
 # =============================================================================
-SENTRY_DSN = config('SENTRY_DSN', default='')
-SENTRY_ENVIRONMENT = config('SENTRY_ENVIRONMENT', default='development')
+SENTRY_DSN = get_env('SENTRY_DSN', '')
+SENTRY_ENVIRONMENT = get_env('SENTRY_ENVIRONMENT', 'development')
 
 # =============================================================================
 # PDPA COMPLIANCE (Singapore)
 # =============================================================================
-PDPA_DSAR_SLA_HOURS = config('PDPA_DSAR_SLA_HOURS', default=72, cast=int)
-PDPA_DATA_RETENTION_DAYS = config('PDPA_DATA_RETENTION_DAYS', default=2555, cast=int)
+PDPA_DSAR_SLA_HOURS = get_env('PDPA_DSAR_SLA_HOURS', '72', cast=int)
+PDPA_DATA_RETENTION_DAYS = get_env('PDPA_DATA_RETENTION_DAYS', '2555', cast=int)
 
 # =============================================================================
 # GST CONFIGURATION (Singapore)
 # =============================================================================
 from decimal import Decimal
-GST_RATE = Decimal(config('GST_RATE', default='0.0900'))
-GST_REGISTRATION_THRESHOLD = config('GST_REGISTRATION_THRESHOLD', default=1000000, cast=int)
+GST_RATE = Decimal(get_env('GST_RATE', '0.0900'))
+GST_REGISTRATION_THRESHOLD = get_env('GST_REGISTRATION_THRESHOLD', '1000000', cast=int)
 
 # =============================================================================
 # LOGGING
@@ -330,7 +346,7 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['console'],
-            'level': config('DJANGO_LOG_LEVEL', default='INFO'),
+            'level': get_env('DJANGO_LOG_LEVEL', 'INFO'),
             'propagate': False,
         },
         'apps': {
