@@ -1,0 +1,17 @@
+Django==6.0
+django-allauth==65.13.1
+django-cors-headers==4.9.0
+django-csp==4.0
+django-debug-toolbar==6.1.0
+django-environ==0.12.0
+django-filter==25.2
+django-storages==1.14.6
+django-stubs==5.2.8
+django-stubs-ext==5.2.8
+django-timezone-field==7.2.1
+django_celery_results==2.6.0
+djangorestframework==3.16.1
+djangorestframework-stubs==3.16.6
+djangorestframework_simplejwt==5.5.1
+opentelemetry-instrumentation-django==0.59b0
+pytest-django==4.11.1
