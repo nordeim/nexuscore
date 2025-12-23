@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.postgres',  # Required for ArrayField
     
     # Third Party
     'rest_framework',
@@ -63,8 +64,10 @@ INSTALLED_APPS = [
     # Local Apps - Phase 3: User & Auth
     'apps.users',
     
-    # Local Apps - Phase 4+: To be enabled
-    # 'apps.organizations',
+    # Local Apps - Phase 4: Organization
+    'apps.organizations',
+    
+    # Local Apps - Phase 5+: To be enabled
     # 'apps.subscriptions',
     # 'apps.leads',
     # 'apps.privacy',
