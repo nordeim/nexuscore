@@ -23,6 +23,9 @@ urlpatterns = [
     # Health Check
     path('health/', health_check, name='health_check'),
     
-    # API v1 (to be implemented in Phase 2+)
-    # path('api/v1/', include('apps.api.urls')),
+    # API v1
+    path('api/v1/', include('apps.users.urls')),
+    
+    # Future API modules (Phase 4+)
+    # path('api/v1/organizations/', include('apps.organizations.urls')),
 ]

@@ -60,8 +60,10 @@ INSTALLED_APPS = [
     'apps.events',
     'apps.webhooks',
     
-    # Local Apps - Phase 3+: To be enabled
-    # 'apps.users',
+    # Local Apps - Phase 3: User & Auth
+    'apps.users',
+    
+    # Local Apps - Phase 4+: To be enabled
     # 'apps.organizations',
     # 'apps.subscriptions',
     # 'apps.leads',
@@ -126,9 +128,9 @@ DATABASES = {
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # =============================================================================
-# CUSTOM USER MODEL (commented out until Phase 3)
+# CUSTOM USER MODEL
 # =============================================================================
-# AUTH_USER_MODEL = 'users.User'
+AUTH_USER_MODEL = 'users.User'
 
 # =============================================================================
 # PASSWORD VALIDATION

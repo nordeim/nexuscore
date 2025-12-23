@@ -1,0 +1,1 @@
+docker exec nexuscore-postgres-1 psql -U nexuscore_user -d nexuscore -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO nexuscore_user; GRANT ALL ON SCHEMA public TO public;"
