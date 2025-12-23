@@ -26,7 +26,8 @@ urlpatterns = [
     # API v1
     path('api/v1/', include('apps.users.urls')),
     path('api/v1/', include('apps.organizations.urls')),
+    path('api/v1/', include('apps.subscriptions.urls')),
     
-    # Future API modules (Phase 5+)
-    # path('api/v1/', include('apps.subscriptions.urls')),
+    # Future API modules (Phase 6+)
+    # path('api/v1/', include('apps.billing.urls')),
 ]

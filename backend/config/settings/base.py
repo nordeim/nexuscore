@@ -67,8 +67,10 @@ INSTALLED_APPS = [
     # Local Apps - Phase 4: Organization
     'apps.organizations',
     
-    # Local Apps - Phase 5+: To be enabled
-    # 'apps.subscriptions',
+    # Local Apps - Phase 5: Subscriptions
+    'apps.subscriptions',
+    
+    # Local Apps - Phase 6+: To be enabled
     # 'apps.leads',
     # 'apps.privacy',
 ]

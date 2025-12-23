@@ -7,3 +7,6 @@ docker exec nexuscore-postgres-1 psql -U nexuscore_user -d nexuscore -c "DROP SC
 
 uv run python manage.py makemigrations organizations
 uv run python manage.py migrate
+
+uv run python manage.py makemigrations subscriptions
+uv run python manage.py migrate
