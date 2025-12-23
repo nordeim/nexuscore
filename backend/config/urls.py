@@ -28,7 +28,8 @@ urlpatterns = [
     path('api/v1/', include('apps.organizations.urls')),
     path('api/v1/', include('apps.subscriptions.urls')),
     path('api/v1/', include('apps.billing.urls')),
+    path('api/v1/', include('apps.leads.urls')),
     
-    # Future API modules (Phase 7+)
-    # path('api/v1/', include('apps.leads.urls')),
+    # Future API modules (Phase 8+)
+    # path('api/v1/', include('apps.privacy.urls')),
 ]
