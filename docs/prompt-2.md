@@ -22,6 +22,14 @@ wesome job on your meticulous review, analysis and planning! Please keep up the 
 
 ---
 
+awesome understanding and meticulous planning! Yes, please meticulously plan and proceed in logical phases. For each phase, please meticulously plan to create the sub-plan for the phase before proceeding according to it. Please think deeper and think harder to deeply explore thoroughly and systematically how you would re-imagine the codebase, then think how you will break it down into practical phase with a checklist and file list for each phase. then meticulously create a master implementation plan. remember to save the master execution plan and all sub-plans as you proceed from phase to phase.
+
+---
+
+Awesome job on your meticulous analysis, planning and execution! Please keep up the good work! Now, please think deeper and think harder to meticulously explore how best to create a complete `Master_Execution_Plan.md` for AI coding agent to follow to build the complete codebase phase by phase. Break down the codebase completion master plan into logical phases which can be executed independently by a coding agent with minimal supervision. Specify the list of files to create for each phase, and for each file, describe its purpose and its interface, and include a checklist for each file. Each file will be validated against its checklist after generation. After think through a well-thought-out project codebase completion master plan, meticulously plan and then create it. Review and validate the  `Master_Execution_Plan.md` after generation.
+
+---
+
 Awesome understanding and meticulous planning! Yes, please meticulously plan and proceed in logical phases. For each phase, please meticulously plan to create the sub-plan for the phase before proceeding according to it. Please think deeper and think harder to deeply explore thoroughly and systematically how you would re-imagine the codebase, then think how you will break it down into practical phase with a checklist and file list for each phase. then meticulously create a master implementation plan. remember to save the master execution plan and all sub-plans as you proceed from phase to phase.
 
 ---
