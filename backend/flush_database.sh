@@ -14,3 +14,5 @@ uv run python manage.py migrate
 uv run python manage.py makemigrations billing
 uv run python manage.py migrate
 
+uv run python manage.py makemigrations privacy
+uv run python manage.py migrate

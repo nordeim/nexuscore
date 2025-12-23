@@ -73,8 +73,10 @@ INSTALLED_APPS = [
     # Local Apps - Phase 7: Lead Management
     'apps.leads',
     
-    # Local Apps - Phase 8+: To be enabled
-    # 'apps.privacy',
+    # Local Apps - Phase 8: Privacy
+    'apps.privacy',
+    
+    # Local Apps - Phase 9+: To be enabled
 ]
 
 # =============================================================================
