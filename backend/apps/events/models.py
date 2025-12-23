@@ -82,12 +82,22 @@ class Event(models.Model):
             Event.log('user.created', user=user, email=user.email)
             Event.log('subscription.activated', organization=org, plan_id=plan.id)
         """
+        import uuid as uuid_module
+        
         user_id = getattr(user, 'id', None) if user else None
         org_id = getattr(organization, 'id', None) if organization else None
+        
+        # Convert any UUID values in data to strings for JSON serialization
+        serialized_data = {}
+        for key, value in data.items():
+            if isinstance(value, uuid_module.UUID):
+                serialized_data[key] = str(value)
+            else:
+                serialized_data[key] = value
         
         return cls.objects.create(
             event_type=event_type,
             user_id=user_id,
             organization_id=org_id,
-            data=data
+            data=serialized_data
         )
