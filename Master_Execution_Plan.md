@@ -270,13 +270,18 @@ docker-compose run --rm backend python manage.py check  # Django check
 
 ---
 
-## PHASE 2: Core Infrastructure Models
+## PHASE 2: Infrastructure Models & Core Utilities
 
 **Duration**: Week 1-2 (Days 3-5)  
 **Dependencies**: Phase 1  
-**Objective**: Implement PRD-d-3 infrastructure models (CRITICAL)
+**Objective**: Implement PRD-d-3 infrastructure models per PAD structure
 
 > ⚠️ **CRITICAL**: These models MUST exist before any domain logic
+>
+> **Note**: Per PAD Section 5.1, models are organized by app:
+> - `IdempotencyRecord` → `apps/billing/`
+> - `Event` → `apps/events/`
+> - `WebhookEvent` → `apps/webhooks/`
 
 ### Files to Create
 
@@ -318,30 +323,57 @@ class CoreConfig(AppConfig):
 
 ---
 
-#### 2.4 `backend/apps/core/models/__init__.py`
+#### 2.4 `backend/apps/core/constants.py`
 
-**Purpose**: Export all core models  
-**Location**: `/nexuscore/backend/apps/core/models/__init__.py`
-
-**Interface**:
-```python
-from .idempotency import IdempotencyRecord
-from .events import Event
-from .webhooks import WebhookEvent
-
-__all__ = ['IdempotencyRecord', 'Event', 'WebhookEvent']
-```
+**Purpose**: Shared constants across apps  
+**Location**: `/nexuscore/backend/apps/core/constants.py`
 
 **Validation Checklist**:
-- [ ] All three models exported
-- [ ] __all__ defined
+- [ ] SINGAPORE_TIMEZONE = 'Asia/Singapore'
+- [ ] DEFAULT_CURRENCY = 'SGD'
+- [ ] GST_RATE = Decimal('0.0900')
+- [ ] DSAR_SLA_HOURS = 72
 
 ---
 
-#### 2.5 `backend/apps/core/models/idempotency.py`
+#### 2.5 `backend/apps/core/exceptions.py`
+
+**Purpose**: Custom exception classes  
+**Location**: `/nexuscore/backend/apps/core/exceptions.py`
+
+**Validation Checklist**:
+- [ ] IdempotencyConflict exception
+- [ ] RateLimitExceeded exception
+- [ ] UENValidationError exception
+
+---
+
+#### 2.6 `backend/apps/core/validators.py`
+
+**Purpose**: Reusable validators  
+**Location**: `/nexuscore/backend/apps/core/validators.py`
+
+**Interface**:
+```python
+UEN_REGEX = r'^[0-9]{8}[A-Z]$|^[0-9]{9}[A-Z]$|^[TSRQ][0-9]{2}[A-Z0-9]{4}[0-9]{3}[A-Z]$'
+GST_REG_NO_REGEX = r'^M[0-9]{8}[A-Z]$'
+
+def validate_uen(value: str) -> None
+def validate_gst_reg_no(value: str) -> None
+```
+
+**Validation Checklist**:
+- [ ] UEN regex matches ACRA formats
+- [ ] GST regex matches IRAS format
+
+---
+
+#### 2.7 `backend/apps/billing/models/idempotency.py`
 
 **Purpose**: Prevent duplicate operations (PRD-d-3)  
-**Location**: `/nexuscore/backend/apps/core/models/idempotency.py`
+**Location**: `/nexuscore/backend/apps/billing/models/idempotency.py`
+
+> **Per PAD Line 789**: IdempotencyRecord belongs in billing app
 
 **Interface**:
 ```python
@@ -375,10 +407,12 @@ class IdempotencyRecord(models.Model):
 
 ---
 
-#### 2.6 `backend/apps/core/models/events.py`
+#### 2.8 `backend/apps/events/models.py`
 
 **Purpose**: Audit logging for all mutations  
-**Location**: `/nexuscore/backend/apps/core/models/events.py`
+**Location**: `/nexuscore/backend/apps/events/models.py`
+
+> **Per PAD Lines 548-556**: Event model has its own app
 
 **Interface**:
 ```python
@@ -405,10 +439,12 @@ class Event(models.Model):
 
 ---
 
-#### 2.7 `backend/apps/core/models/webhooks.py`
+#### 2.9 `backend/apps/webhooks/models.py`
 
 **Purpose**: Track external webhook events  
-**Location**: `/nexuscore/backend/apps/core/models/webhooks.py`
+**Location**: `/nexuscore/backend/apps/webhooks/models.py`
+
+> **Per PAD Lines 534-546**: WebhookEvent has its own app with handlers
 
 **Interface**:
 ```python
@@ -454,14 +490,24 @@ class WebhookEvent(models.Model):
 ### Phase 2 Validation
 
 ```bash
-docker-compose run --rm backend python manage.py makemigrations core
+# Create migrations for all infrastructure apps
+docker-compose run --rm backend python manage.py makemigrations billing events webhooks
 docker-compose run --rm backend python manage.py migrate
-docker-compose run --rm backend python manage.py shell -c "from apps.core.models import IdempotencyRecord, Event, WebhookEvent; print('OK')"
+
+# Verify models are importable from correct locations
+docker-compose run --rm backend python manage.py shell -c "
+from apps.billing.models import IdempotencyRecord
+from apps.events.models import Event
+from apps.webhooks.models import WebhookEvent
+print('All infrastructure models OK')
+"
 ```
 
 **Success Criteria**:
 - [ ] Migrations create without errors
-- [ ] All three models importable
+- [ ] IdempotencyRecord importable from `apps.billing.models`
+- [ ] Event importable from `apps.events.models`
+- [ ] WebhookEvent importable from `apps.webhooks.models`
 - [ ] Tables created in PostgreSQL
 
 ---
@@ -627,7 +673,55 @@ urlpatterns = [
 
 ---
 
-#### 3.7 `backend/apps/users/tasks.py`
+#### 3.7 `backend/apps/users/managers.py`
+
+**Purpose**: Custom User manager  
+**Location**: `/nexuscore/backend/apps/users/managers.py`
+
+> **Per PAD Line 470**: Separate managers file
+
+**Interface**:
+```python
+class UserManager(BaseUserManager):
+    def create_user(self, email, password=None, **extra_fields) -> User
+    def create_superuser(self, email, password, **extra_fields) -> User
+    def get_by_natural_key(self, email) -> User
+```
+
+**Validation Checklist**:
+- [ ] create_user normalizes email
+- [ ] create_superuser sets is_staff=True, is_superuser=True
+- [ ] Email is lowercased
+
+---
+
+#### 3.8 `backend/apps/users/signals.py`
+
+**Purpose**: User-related Django signals  
+**Location**: `/nexuscore/backend/apps/users/signals.py`
+
+> **Per PAD Line 474**: Separate signals file
+
+**Interface**:
+```python
+@receiver(post_save, sender=User)
+def user_created_handler(sender, instance, created, **kwargs):
+    if created:
+        Event.objects.create(
+            event_type='user.created',
+            user=instance,
+            data={'email': instance.email}
+        )
+```
+
+**Validation Checklist**:
+- [ ] post_save signal for user creation
+- [ ] Creates Event for audit log
+- [ ] Connected in apps.py ready() method
+
+---
+
+#### 3.9 `backend/apps/users/tasks.py`
 
 **Purpose**: User-related async tasks  
 **Location**: `/nexuscore/backend/apps/users/tasks.py`
@@ -1666,8 +1760,8 @@ npm audit
 | Phase | Backend Files | Frontend Files | Config Files |
 |-------|---------------|----------------|--------------|
 | 1 | 9 | 0 | 3 |
-| 2 | 8 | 0 | 0 |
-| 3 | 7 | 0 | 0 |
+| 2 | 9 | 0 | 0 |
+| 3 | 9 | 0 | 0 |
 | 4 | 5 | 0 | 0 |
 | 5 | 4 | 0 | 0 |
 | 6 | 4 | 0 | 0 |
@@ -1677,9 +1771,14 @@ npm audit
 | 10 | 0 | 8 | 3 |
 | 11 | 0 | 25 | 0 |
 | 12 | 4 | 2 | 3 |
-| **Total** | **53** | **35** | **9** |
+| **Total** | **56** | **35** | **9** |
 
-**Grand Total: 97 files**
+**Grand Total: 100 files**
+
+> ✅ **Validated against**:
+> - Project_Architecture_Document.md (PAD)
+> - NexusCore-v4.0-Merged-PRD.md
+> - comprehensive_analysis_validation.md
 
 ---
 
