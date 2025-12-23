@@ -1,0 +1,28 @@
+# NexusCore Backend - Development Requirements
+# Extends base.txt with development tools
+
+-r base.txt
+
+# Testing
+pytest>=8.0.0
+pytest-django>=4.8.0
+pytest-cov>=4.1.0
+pytest-asyncio>=0.23.0
+factory-boy>=3.3.0
+faker>=22.0.0
+
+# Code Quality
+ruff>=0.1.0
+black>=24.0.0
+isort>=5.13.0
+mypy>=1.8.0
+django-stubs>=4.2.0
+djangorestframework-stubs>=3.14.0
+
+# Debugging
+django-debug-toolbar>=4.2.0
+ipython>=8.20.0
+rich>=13.7.0
+
+# Documentation
+drf-spectacular>=0.27.0
