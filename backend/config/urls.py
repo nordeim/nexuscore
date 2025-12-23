@@ -31,6 +31,6 @@ urlpatterns = [
     path('api/v1/', include('apps.leads.urls')),
     path('api/v1/', include('apps.privacy.urls')),
     
-    # Future API modules (Phase 9+)
-    # path('api/v1/', include('apps.webhooks.urls')),
+    # Webhooks (no /api/v1 prefix)
+    path('', include('apps.webhooks.urls')),
 ]
