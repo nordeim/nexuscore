@@ -1,3 +1,5 @@
+<img width="868" height="679" alt="image" src="https://github.com/user-attachments/assets/d1d6e5c2-e0b7-4a5e-bd4c-0de0a7b207f7" />
+
 # 🚀 NexusCore — Singapore Enterprise SaaS Platform
 
 <div align="center">
